@@ -1,0 +1,152 @@
+---
+title: "Lab 01 11_05_21"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(stats4)
+library(psych)
+```
+
+```{r}
+#Exemplo já feito em classe 
+exemplo <- read.csv2("~/boxplot1.csv")
+str(exemplo)
+```
+```{r}
+summary(exemplo)
+```
+
+```{r}
+describe(exemplo)
+```
+
+```{r}
+boxplot(exemplo)
+```
+
+
+```{r}
+exemplo <- read.csv2("~/descritiva.csv")
+str(exemplo)
+```
+```{r}
+summary(exemplo)
+```
+
+```{r}
+describe(exemplo)
+```
+
+```{r}
+boxplot(exemplo)
+```
+```{r}
+hist(exemplo$Processo1)
+hist(exemplo$Processo2)
+hist(exemplo$Processo3)
+```
+
+```{r}
+# Gráfico sequencial + Box Plot
+SequencialBoxplot = function(a){
+tamanho <- length(a)
+x <- 1:tamanho
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,2))
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,1))
+}
+```
+
+```{r}
+SequencialBoxplot(exemplo$Processo1)
+SequencialBoxplot(exemplo$Processo2)
+SequencialBoxplot(exemplo$Processo3)
+```
+
+```{r}
+t.test(exemplo$Processo1, conf.level = 0.95)
+```
+
+```{r}
+# Grafico do intervalo de confiança
+GraficoIntConf = function(a){
+ c <- describe(a)
+ xbarra <- c$mean
+ variancia <- c$sd*c$sd
+ tamanho <- length(a)
+
+t.ic <- xbarra + qt(c(0.025, 0.975), df = tamanho-1) * sqrt(variancia/tamanho)
+
+Osdados1 <- data.frame("nome_estimativa" = "estimativa1",
+                    "media_estimada" = xbarra,
+                    "limite_inferior" = t.ic[1],
+                    "lim_superior" = t.ic[2]) 
+
+ggplot(Osdados1,aes(x = nome_estimativa, y = media_estimada)) +
+geom_point(color = "black",size = 3) +
+geom_errorbar(aes(ymin = limite_inferior,ymax = lim_superior), color = "red")
+}
+```
+
+```{r}
+GraficoIntConf(exemplo$Processo1)
+GraficoIntConf(exemplo$Processo2)
+GraficoIntConf(exemplo$Processo3)
+```
+
+```{r}
+exemplo <- read.csv2("~/Base_Vinhos_2018.csv")
+str(exemplo)
+```
+
+```{r}
+exemplo_vinho <- split(exemplo, exemplo$Vinho)
+```
+```{r}
+summary(exemplo)
+```
+
+```{r}
+describe(exemplo)
+```
+
+```{r}
+boxplot(exemplo$pH)
+```
+```{r}
+hist(exemplo$pH)
+```
+
+```{r}
+# Gráfico sequencial + Box Plot
+SequencialBoxplot = function(a){
+tamanho <- length(a)
+x <- 1:tamanho
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,2))
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,1))
+}
+```
+
+```{r}
+SequencialBoxplot(exemplo$pH)
+```
+```{r}
+boxplot(exemplo_vinho$RED$pH, exemplo_vinho$WHITE$pH)
+```
+```{r}
+t.test(exemplo_vinho$RED$pH, conf.level = 0.95)
+t.test(exemplo_vinho$WHITE$pH, conf.level = 0.95)
+
+```
