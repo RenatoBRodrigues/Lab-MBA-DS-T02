@@ -1,0 +1,173 @@
+---
+title: "Lab 02 25_05_21"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r}
+library(ggplot2)
+library(tidyr)
+library(stats4)
+library(psych)
+```
+
+```{r}
+exemplo <- read.csv2("~/Base_Vinhos_2018.csv")
+str(exemplo)
+```
+
+```{r}
+exemplo_vinho <- split(exemplo, exemplo$Vinho)
+```
+
+```{r}
+summary(exemplo)
+```
+
+```{r}
+describe(exemplo)
+```
+
+```{r}
+boxplot(exemplo$pH)
+```
+
+```{r}
+hist(exemplo$pH)
+```
+
+```{r}
+# Gráfico sequencial + Box Plot
+SequencialBoxplot = function(a){
+tamanho <- length(a)
+x <- 1:tamanho
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,2))
+boxplot(a)
+plot(a ~ x, type = "b")
+par(mfrow=c(1,1))
+}
+```
+
+```{r}
+SequencialBoxplot(exemplo$pH)
+```
+
+```{r}
+boxplot(exemplo_vinho$RED$pH, exemplo_vinho$WHITE$pH)
+```
+
+```{r}
+hist(exemplo_vinho$RED$pH)
+hist(exemplo_vinho$WHITE$pH)
+```
+
+```{r}
+#Intervalo de confiança para a média com nível de confança de 95%
+t.test(exemplo_vinho$RED$pH, conf.level = 0.95)
+t.test(exemplo_vinho$WHITE$pH, conf.level = 0.95)
+```
+
+```{r}
+#Intervalo de confiança para a média com nível de confança de 90%
+t.test(exemplo_vinho$RED$pH, conf.level = 0.90)
+t.test(exemplo_vinho$WHITE$pH, conf.level = 0.90)
+```
+
+```{r}
+exemplo <- read.csv2("~/caminhao.csv")
+str(exemplo)
+```
+
+```{r}
+summary(exemplo)
+```
+
+```{r}
+boxplot(exemplo$Tempo ~ exemplo$Tipo)
+```
+
+```{r}
+exemplo_caminhao <- split(exemplo, exemplo$Tipo)
+```
+
+```{r}
+#Teste de Normalidade
+#shapiro.test(exemplo_caminhao$bau$Tempo)
+#shapiro.test(exemplo_caminhao$lonado$Tempo)
+```
+
+```{r}
+#Teste de hipótese para Média
+t.test(exemplo_caminhao$bau$Tempo, mu = 3, conf.level = 0.95)
+t.test(exemplo_caminhao$lonado$Tempo, mu = 3, conf.level = 0.95)
+```
+
+```{r}
+exemplo <- read.csv2("~/Base_Vinhos_2018.csv")
+str(exemplo)
+```
+
+```{r}
+exemplo_vinho <- split(exemplo, exemplo$Vinho)
+```
+
+```{r}
+summary(exemplo)
+var(exemplo_vinho$RED$pH)
+var(exemplo_vinho$WHITE$pH)
+```
+
+```{r}
+#Teste de Normalidade
+#shapiro.test(exemplo_vinho$WHITE$pH)
+#shapiro.test(exemplo_vinho$RED$pH)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Levene
+#library(car)
+#leveneTest(exemplo$pH, exemplo$Vinho)
+```
+
+```{r}
+#Intervalo de Confiança para Variância
+
+ICVariancia <- function(a, b){
+n<-length(a)
+s2<-var(a)
+ic.sigma2<-(n-1)* s2/qchisq(c(1-((1-b)/2), (1-b)/2), n-1)
+ic.sigma2
+}
+```
+
+```{r}
+ICVariancia(exemplo_vinho$RED$pH, 0.95)
+ICVariancia(exemplo_vinho$WHITE$pH, 0.95)
+```
+
+
+```{r}
+#Teste de hipótese para Variância - Teste de Cochrans
+#library(nonpar)
+
+#EmColunas <- cbind(exemplo_vinho$RED$pH, exemplo_vinho$WHITE$pH)
+
+#cochrans.q(EmColunas)
+```
+
+```{r}
+#Teste de hipótese para Média
+#t.test(exemplo$pH ~ exemplo$Vinho, var.equal = TRUE)
+t.test(exemplo_vinho$RED$pH, mu = 3.45, conf.level = 0.95)
+t.test(exemplo_vinho$WHITE$pH, mu = 3.25, conf.level = 0.95)
+
+
+```
+
+```{r}
+#boxplot(exemplo_vinho$RED$pH, exemplo_vinho$WHITE$pH)
+```
