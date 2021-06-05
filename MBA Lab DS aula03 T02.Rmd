@@ -1,0 +1,339 @@
+---
+title: "MBA Lab DS aula03 T02"
+author: "Renato B Rodrigues"
+date: "05/06/2021"
+output: html_document
+---
+
+```{r}
+library(ggplot2)
+library(qqplotr)
+library(tidyr)
+library(stats4)
+library(psych)
+library(onewaytests)
+library(car)
+library(nonpar)
+```
+
+```{r}
+caminhao <- read.csv2("~/caminhao.csv")
+str(caminhao)
+```
+
+```{r}
+summary(caminhao)
+```
+
+```{r}
+Tipo_caminhao <- split(caminhao, caminhao$Tipo)
+```
+
+```{r}
+#Boxplot comparando os 2 tipos de camnhões 
+boxplot(caminhao$Tempo ~ caminhao$Tipo)
+```
+
+```{r}
+#Teste de Normalidade para bau
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+
+ggplot(mapping = aes(sample = Tipo_caminhao$bau$Tempo)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Tipo_caminhao$bau$Tempo)
+```
+
+```{r}
+#Teste de Normalidade para bau
+ggplot(mapping = aes(sample = Tipo_caminhao$lonado$Tempo)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Tipo_caminhao$lonado$Tempo)
+```
+
+```{r}
+#Teste para variancias, assumindo 2 distribuições Normais
+#H0: Var(bau) = Var(lonado)
+#Ha: Var(bau) <> Var(lonado)
+var.test(caminhao$Tempo ~ caminhao$Tipo)
+```
+
+```{r}
+#Teste para médias, assumindo variancias diferentes
+#H0: Media(bau) = Media(lonado)
+#Ha: Media(bau) <> Media(lonado)
+
+t.test(caminhao$Tempo ~ caminhao$Tipo, var.equal = FALSE)
+```
+
+```{r}
+vinhos <- read.csv2("~/Base_Vinhos_2018.csv")
+str(vinhos)
+```
+
+```{r}
+summary(vinhos)
+```
+
+```{r}
+boxplot(vinhos$pH ~ vinhos$Vinho)
+```
+
+```{r}
+Cor_vinhos <- split(vinhos, vinhos$Vinho)
+```
+
+```{r}
+#Teste de Normalidade para pH Brancos
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+
+ggplot(mapping = aes(sample = Cor_vinhos$WHITE$pH)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Cor_vinhos$WHITE$pH)
+
+```
+
+```{r}
+#Teste de Normalidade para pH Tintos
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+
+ggplot(mapping = aes(sample = Cor_vinhos$RED$pH)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Cor_vinhos$RED$pH)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Levene - Distribuições não Normais
+#H0: Var(pH Brancos) = Var(pH Tintos)
+#Ha: Var(pH Brancos) <> Var(pH Tintos)
+
+var(Cor_vinhos$RED$pH)
+var(Cor_vinhos$WHITE$pH)
+
+leveneTest(vinhos$pH, vinhos$Vinho)
+```
+
+```{r}
+#Intervalo de Confiança para Variância
+
+ICVariancia <- function(a, b){
+n<-length(a)
+s2<-var(a)
+ic.sigma2<-(n-1)* s2/qchisq(c(1-((1-b)/2), (1-b)/2), n-1)
+ic.sigma2
+}
+```
+
+```{r}
+ICVariancia(Cor_vinhos$RED$pH, 0.95)
+ICVariancia(Cor_vinhos$WHITE$pH, 0.95)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Cochrans - Distribuições não Normais
+#H0: Var(pH Brancos) = Var(pH Tintos)
+#Ha: Var(pH Brancos) <> Var(pH Tintos)
+
+EmColunas <- cbind(Cor_vinhos$RED$pH, Cor_vinhos$WHITE$pH)
+
+cochrans.q(EmColunas)
+```
+
+```{r}
+#Teste de hipótese para Média, assumindo variancias iguais
+#H0: Media(pH Brancos) = Media(pH Tintos)
+#Ha: Media(pH Brancos) <> Media(pH Tintos)
+
+t.test(vinhos$pH ~ vinhos$Vinho, var.equal = TRUE)
+```
+
+```{r}
+boxplot(vinhos$alcohol ~ vinhos$Vinho)
+```
+
+```{r}
+#Teste de Normalidade para alcool Brancos
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+
+ggplot(mapping = aes(sample = Cor_vinhos$WHITE$alcohol)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Cor_vinhos$WHITE$alcohol)
+
+```
+
+```{r}
+#Teste de Normalidade para alcool Tintos
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+
+ggplot(mapping = aes(sample = Cor_vinhos$RED$alcohol)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+
+shapiro.test(Cor_vinhos$RED$alcohol)
+
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Levene - Distribuições não Normais
+#H0: Var(pH Brancos) = Var(pH Tintos)
+#Ha: Var(pH Brancos) <> Var(pH Tintos)
+
+var(Cor_vinhos$RED$alcohol)
+var(Cor_vinhos$WHITE$alcohol)
+
+leveneTest(vinhos$alcohol, vinhos$Vinho)
+```
+
+```{r}
+#Intervalo de Confiança para Variância
+
+ICVariancia <- function(a, b){
+n<-length(a)
+s2<-var(a)
+ic.sigma2<-(n-1)* s2/qchisq(c(1-((1-b)/2), (1-b)/2), n-1)
+ic.sigma2
+}
+```
+
+```{r}
+ICVariancia(Cor_vinhos$RED$alcohol, 0.95)
+ICVariancia(Cor_vinhos$WHITE$alcohol, 0.95)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Cochrans - Distribuições não Normais
+#H0: Var(pH Brancos) = Var(pH Tintos)
+#Ha: Var(pH Brancos) <> Var(pH Tintos)
+
+EmColunas <- cbind(Cor_vinhos$RED$alcohol, Cor_vinhos$WHITE$alcohol)
+
+cochrans.q(EmColunas)
+```
+
+```{r}
+#Teste de hipótese para Média
+#H0: Media(alcool Brancos) = Media(alcool Tintos)
+#Ha: Media(alcool Brancos) <> Media(alcool Tintos)
+
+t.test(vinhos$alcohol ~ vinhos$Vinho, var.equal = TRUE)
+```
+
+```{r}
+Ipem <- read.csv2("~/ipem.csv")
+```
+
+```{r}
+boxplot(Ipem$Massa ~ Ipem$Marca)
+```
+
+```{r}
+Marca_Ipem <- split(Ipem, Ipem$Marca)
+```
+
+```{r}
+#Teste de Normalidade
+#H0: A distribuição é Normal
+#Ha: A distribuição não é Normal
+Papel_Normal = function(a)
+{
+ggplot(mapping = aes(sample = a)) + stat_qq_point(size = 2, color = "red") + stat_qq_line(color = "green") + xlab ("x-axis") + ylab("y-axis")
+}
+  
+Teste_Normal = function(a)
+{
+shapiro.test(a)
+}
+```
+
+```{r}
+Papel_Normal (Marca_Ipem$A$Massa)
+Teste_Normal(Marca_Ipem$A$Massa)
+```
+
+```{r}
+Papel_Normal (Marca_Ipem$B$Massa)
+Teste_Normal(Marca_Ipem$B$Massa)
+```
+
+```{r}
+Papel_Normal (Marca_Ipem$C$Massa)
+Teste_Normal(Marca_Ipem$C$Massa)
+```
+
+```{r}
+Papel_Normal (Marca_Ipem$D$Massa)
+Teste_Normal(Marca_Ipem$D$Massa)
+```
+
+```{r}
+Papel_Normal (Marca_Ipem$E$Massa)
+Teste_Normal(Marca_Ipem$E$Massa)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Levene
+#H0: Var todas iguais
+#Ha: Var pelo menos uma diferente
+
+leveneTest(Ipem$Massa, Ipem$Marca)
+```
+
+```{r}
+#Teste de hipótese para Variância - Teste de Cochrans
+#H0: Var todas iguais
+#Ha: Var pelo menos uma diferente
+
+EmColunas <- cbind(Marca_Ipem$A$Massa, Marca_Ipem$B$Massa, Marca_Ipem$C$Massa, Marca_Ipem$D$Massa, Marca_Ipem$E$Massa)
+
+cochrans.q(EmColunas)
+```
+
+```{r}
+#Teste de Igualde de medias
+#H0: medias todas iguais
+#Ha: pelo menos uma media é diferentes das outras 
+
+#Variancias iguas
+Anova <- lm (Ipem$Massa ~ Ipem$Marca)
+summary(Anova)
+
+#Variancias diferentes
+#welch.test(Massa ~ Marca, data = Ipem)
+```
+
+```{r}
+#Análise de regressão simples
+#Nota do vinho (quality) com relação ao % de alcool
+plot(vinhos$quality ~  vinhos$alcohol) 
+Regressao <- lm(vinhos$quality ~ vinhos$alcohol)
+summary(Regressao)
+plot(Regressao)
+```
+
+```{r}
+#Análise de regressão simples
+#Nota do vinho (quality) com relação ao pH
+plot(vinhos$quality ~  vinhos$pH) 
+Regressao <- lm(vinhos$quality ~ vinhos$pH)
+summary(Regressao)
+plot(Regressao)
+```
+
+```{r}
+#Análise de regressão simples
+#Nota do vinho (quality) com relação ao residuo de acucar
+plot(vinhos$quality ~  vinhos$residualsugar) 
+Regressao <- lm(vinhos$quality ~ vinhos$residualsugar)
+summary(Regressao)
+plot(Regressao)
+```
+
+```{r}
+#Análise de regressão multipla
+#Nota do vinho (quality) com relação ao alcool + pH + residuo de acucar
+Regressao <- lm(vinhos$quality ~ vinhos$alcohol + vinhos$pH + vinhos$residualsugar)
+summary(Regressao)
+plot(Regressao)
+```
